@@ -1,111 +1,96 @@
-// angular
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-
-// libs
-import { Observable, zip } from 'rxjs';
-import { filter, map, switchMap, takeUntil } from 'rxjs/operators';
-import { isNil } from 'lodash/fp';
 import { select, Store } from '@ngrx/store';
-import { TranslateService } from '@ngx-translate/core';
 import { MetaService } from '@ngx-meta/core';
-
-// framework
+import { TranslateService } from '@ngx-translate/core';
+import { getOr, isNil } from 'lodash/fp';
+import { Observable, of as observableOf, zip } from 'rxjs';
+import { skipWhile, switchMap, takeUntil } from 'rxjs/operators';
 import { BaseContainerComponent } from '~/app/framework/core';
 import { UniqueId } from '~/app/framework/ngrx';
-
-// shared
-import { RenderFlag } from '~/app/shared';
-
-// app
-import { routeAnimation } from '~/app/app.animations';
-
-// store
+import { RenderFlag, routeAnimation } from '~/app/shared';
 import { Airline, airlineActions, AirlineSelectors, State } from '~/app/store';
 
 @Component({
   templateUrl: './airline-detail-container.component.html',
   styleUrls: ['./airline-detail-container.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [routeAnimation]
 })
 export class AirlineDetailContainerComponent extends BaseContainerComponent implements OnInit {
   airline$: Observable<Airline>;
   baseRoute: Array<string>;
 
-  constructor(private readonly router: Router,
-              private readonly route: ActivatedRoute,
-              private readonly translate: TranslateService,
-              private readonly meta: MetaService,
-              protected readonly store$: Store<State>) {
+  constructor(
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+    private readonly translate: TranslateService,
+    private readonly meta: MetaService,
+    protected readonly store$: Store<State>
+  ) {
     super(store$);
   }
 
   ngOnInit(): void {
     this.baseRoute = ['/', 'air-universal', 'airlines'];
 
-    this.isProcessing$ = this.store$
-      .pipe(select(AirlineSelectors.getIsProcessing));
-    this.error$ = this.store$
-      .pipe(select(AirlineSelectors.getError));
-    this.airline$ = this.store$
-      .pipe(select(AirlineSelectors.getSelected));
+    this.isProcessing$ = this.store$.pipe(select(AirlineSelectors.getIsProcessing));
+    this.error$ = this.store$.pipe(select(AirlineSelectors.getError));
+    this.airline$ = this.store$.pipe(select(AirlineSelectors.getSelected));
 
-    this.route.data
+    this.airline$
       .pipe(
-        switchMap(res => zip(
-          this.translate.get(res.meta.title),
-          this.airline$
-            .pipe(filter(cur => !isNil(cur)))
-        )),
+        skipWhile(isNil),
+        switchMap(res => zip(this.route.data, observableOf(res))),
+        switchMap(([data, airline]) => zip(this.translate.get(data.meta.title), observableOf(airline))),
         takeUntil(this.ngUnsubscribe)
       )
-      .subscribe(([title, res]) => {
-        const subTitle = res.name;
+      .subscribe(([title, airline]: Array<any>) => {
+        const subtitle = getOr('')('name')(airline);
 
-        this.meta.setTitle(subTitle ? `${title} - ${subTitle}` : title);
+        this.meta.setTitle(subtitle ? `${title} - ${subtitle}` : title);
       });
 
     zip(this.route.data, this.route.params)
-      .pipe(
-        map(([data, params]) => {
-          if (data.renderFlag === RenderFlag.Create)
-            return this.store$.dispatch(airlineActions.addOneAirline());
-
-          return this.store$.dispatch(airlineActions.getOneAirline(params.id));
-        }),
-        takeUntil(this.ngUnsubscribe)
-      )
-      .subscribe(() => {/**/
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(([data, params]) => {
+        if (data.renderFlag === RenderFlag.Create) {
+          this.store$.dispatch(airlineActions.airUniversalAddOneAirline());
+        } else {
+          this.store$.dispatch(airlineActions.airUniversalGetOneAirline(params.id));
+        }
       });
   }
 
   delete(id: UniqueId): void {
-    this.store$.dispatch(airlineActions.deleteOneAirline({
-      id,
-      router: this.router,
-      route: this.baseRoute
-    }));
+    this.store$.dispatch(
+      airlineActions.airUniversalDeleteOneAirline({
+        id,
+        router: this.router,
+        route: this.baseRoute
+      })
+    );
   }
 
   save(resource: any): void {
-    this.route.data
-      .pipe(
-        map(cur => {
-          cur.renderFlag === RenderFlag.Create
-            ? this.store$.dispatch(airlineActions.createOneAirline({
-              resource,
-              router: this.router,
-              route: this.baseRoute
-            }))
-            : this.store$.dispatch(airlineActions.updateOneAirline({
-              resource,
-              router: this.router,
-              route: this.baseRoute
-            }));
-        }),
-        takeUntil(this.ngUnsubscribe)
-      )
-      .subscribe(() => {/**/
-      });
+    this.route.data.pipe(takeUntil(this.ngUnsubscribe)).subscribe(res => {
+      if (res.renderFlag === RenderFlag.Create) {
+        this.store$.dispatch(
+          airlineActions.airUniversalCreateOneAirline({
+            resource,
+            router: this.router,
+            route: this.baseRoute
+          })
+        );
+      } else {
+        this.store$.dispatch(
+          airlineActions.airUniversalUpdateOneAirline({
+            resource,
+            router: this.router,
+            route: this.baseRoute
+          })
+        );
+      }
+    });
   }
 }

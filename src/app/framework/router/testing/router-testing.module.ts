@@ -1,11 +1,9 @@
-// angular
 import { NgModule } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { RouterTestingModule as ROUTER_TESTING_MODULE } from '@angular/router/testing';
 
-// mocks
 import { MockActivatedRoute } from './mocks/activated-route.mock';
 import { MockRouter } from './mocks/router.mock';
-import { RouterTestingModule as ROUTER_TESTING_MODULE } from '@angular/router/testing';
 
 @NgModule({
   providers: [
@@ -19,5 +17,4 @@ import { RouterTestingModule as ROUTER_TESTING_MODULE } from '@angular/router/te
     }
   ]
 })
-export class RouterTestingModule extends ROUTER_TESTING_MODULE {
-}
+export class RouterTestingModule extends ROUTER_TESTING_MODULE {}

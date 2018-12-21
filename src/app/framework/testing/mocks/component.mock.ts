@@ -1,6 +1,7 @@
-// angular
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
-@Component({template: ''})
-export class MockComponent {
-}
+@Component({
+  template: '',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class MockComponent {}

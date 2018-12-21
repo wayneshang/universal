@@ -1,22 +1,19 @@
-// angular
-import { Component } from '@angular/core';
-
-// libs
-import { Observable } from 'rxjs';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { FrameworkState } from '~/app/framework/store';
 
-// module
 import { BaseComponent } from './base.component';
-import { State } from '~/app/store';
 
 @Component({
-  template: ''
+  template: '',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BaseContainerComponent extends BaseComponent {
   error$: Observable<string>;
   isProcessing$: Observable<boolean>;
 
-  constructor(protected readonly store$: Store<State>) {
+  constructor(protected readonly store$: Store<FrameworkState>) {
     super();
   }
 }

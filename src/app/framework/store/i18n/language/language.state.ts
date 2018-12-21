@@ -1,5 +1,4 @@
-// module
-import { Language } from './language.model';
+import { initialLanguage, Language } from './language.model';
 
 export const LANGUAGE = 'i18n--language';
 
@@ -10,7 +9,7 @@ export interface State {
 }
 
 export const initialState: State = {
-  selectedItem: undefined,
+  selectedItem: initialLanguage,
   isProcessing: false,
   error: undefined
 };

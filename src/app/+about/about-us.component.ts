@@ -1,16 +1,11 @@
-// angular
-import { Component } from '@angular/core';
-
-// framework
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { BaseComponent } from '~/app/framework/core';
-
-// app
-import { routeAnimation } from '~/app/app.animations';
+import { routeAnimation } from '~/app/shared';
 
 @Component({
   templateUrl: './about-us.component.html',
   styleUrls: ['about-us.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [routeAnimation]
 })
-export class AboutUsComponent extends BaseComponent {
-}
+export class AboutUsComponent extends BaseComponent {}

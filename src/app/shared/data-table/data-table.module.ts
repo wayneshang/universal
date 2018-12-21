@@ -1,35 +1,19 @@
-// angular
 import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
 import { FlexLayoutModule, LAYOUT_CONFIG } from '@angular/flex-layout';
-
-// libs
+import { RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
-
-// framework
 import { APP_LAYOUT_CONFIG } from '~/app/framework/core';
 import { MaterialModule } from '~/app/framework/material';
+import { CommonModule } from '~/app/shared';
 
-// module
-import { CommonModule } from '../common/common.module';
-import { DataTableComponent } from './data-table.component';
 import { DataTableBaseComponent } from './data-table-base.component';
+import { DataTableComponent } from './data-table.component';
 
 @NgModule({
-  imports: [
-    RouterModule,
-    MaterialModule,
-    FlexLayoutModule,
-    TranslateModule,
-    PerfectScrollbarModule,
-    CommonModule
-  ],
+  imports: [RouterModule, FlexLayoutModule, TranslateModule, PerfectScrollbarModule, MaterialModule, CommonModule],
   exports: [DataTableComponent],
-  declarations: [
-    DataTableComponent,
-    DataTableBaseComponent
-  ],
+  declarations: [DataTableComponent, DataTableBaseComponent],
   providers: [
     {
       provide: LAYOUT_CONFIG,
@@ -37,5 +21,4 @@ import { DataTableBaseComponent } from './data-table-base.component';
     }
   ]
 })
-export class DataTableModule {
-}
+export class DataTableModule {}

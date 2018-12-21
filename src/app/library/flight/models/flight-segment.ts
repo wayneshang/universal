@@ -1,7 +1,5 @@
-// shared
 import { BaseDocument } from '~/app/framework/ngrx';
 
-// module
 import { Airline } from './airline';
 import { Airport } from './airport';
 

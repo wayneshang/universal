@@ -1,4 +1,3 @@
-// shared
 import { BaseDocument } from '~/app/framework/ngrx';
 
 export interface Airline extends BaseDocument {

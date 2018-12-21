@@ -1,20 +1,14 @@
-// angular
 import { NgModule } from '@angular/core';
 import { BrowserTransferStateModule, TransferState } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { REQUEST } from '@nguniversal/express-engine/tokens';
-
-// libs
+import { AuthModule } from '@ngx-auth/core';
 import { CACHE } from '@ngx-cache/core';
 import { BrowserCacheModule, MemoryCacheService } from '@ngx-cache/platform-browser';
-import { AuthModule } from '@ngx-auth/core';
 import 'hammerjs';
-
-// framework
 import { AuthTestingModule } from '~/app/framework/auth/testing';
 import { ConsoleService, CoreModule, WindowService } from '~/app/framework/core';
 
-// module
 import { AppComponent } from './app.component';
 import { AppModule, REQ_KEY } from './app.module';
 
@@ -28,6 +22,8 @@ import { AppModule, REQ_KEY } from './app.module';
         useClass: MemoryCacheService
       }
     ]),
+    AuthModule.forRoot(),
+    AuthTestingModule,
     CoreModule.forRoot([
       {
         provide: WindowService,
@@ -38,8 +34,6 @@ import { AppModule, REQ_KEY } from './app.module';
         useFactory: () => console
       }
     ]),
-    AuthModule.forRoot(),
-    AuthTestingModule,
     AppModule
   ],
   providers: [
@@ -51,5 +45,4 @@ import { AppModule, REQ_KEY } from './app.module';
   ],
   bootstrap: [AppComponent]
 })
-export class AppBrowserModule {
-}
+export class AppBrowserModule {}

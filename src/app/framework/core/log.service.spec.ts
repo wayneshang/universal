@@ -1,207 +1,196 @@
 // tslint:disable
-// angular
 import { InjectionToken } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
-
-// libs
 import { ConfigLoader, ConfigModule, ConfigService, ConfigStaticLoader } from '@ngx-config/core';
-
-// testing
 import { t } from '~/app/framework/testing';
 
-// module
-import { LogLevel } from './models/log-level';
 import { ConsoleService } from './console.service';
 import { LogService } from './log.service';
+import { LogLevel } from './models/log-level';
 
 const LOG_LEVEL = new InjectionToken<LogLevel>('LOG_LEVEL');
 
 const testModuleConfig = (logLevel: LogLevel) => {
   TestBed.resetTestEnvironment();
 
-  TestBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting())
-    .configureTestingModule({
-      imports: [
-        ConfigModule.forRoot({
-          provide: ConfigLoader,
-          useFactory: (logLevel: LogLevel) => new ConfigStaticLoader({
-            logging: {level: logLevel}
+  TestBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting()).configureTestingModule({
+    imports: [
+      ConfigModule.forRoot({
+        provide: ConfigLoader,
+        useFactory: () =>
+          new ConfigStaticLoader({
+            logging: { level: logLevel }
           }),
-          deps: [LOG_LEVEL]
-        })
-      ],
-      providers: [
-        {
-          provide: LOG_LEVEL,
-          useValue: logLevel
-        },
-        {
-          provide: ConsoleService,
-          useValue: console
-        },
-        LogService
-      ]
-    });
+        deps: [LOG_LEVEL]
+      })
+    ],
+    providers: [
+      {
+        provide: LOG_LEVEL,
+        useValue: logLevel
+      },
+      {
+        provide: ConsoleService,
+        useValue: console
+      },
+      LogService
+    ]
+  });
 };
 
-t.describe('ng-seed/universal', () => {
-  t.describe('framework', () => {
-    t.describe('core: LogService', () => {
-      t.be(() => {
-        t.spyOn(console, 'log');
-        t.spyOn(console, 'error');
-        t.spyOn(console, 'warn');
-        t.spyOn(console, 'info');
-      });
+t.describe('LogService', () => {
+  t.be(() => {
+    t.spyOn(console, 'log');
+    t.spyOn(console, 'error');
+    t.spyOn(console, 'warn');
+    t.spyOn(console, 'info');
+  });
 
-      t.it('is defined', () => {
-        testModuleConfig(0);
+  t.it('is defined', () => {
+    testModuleConfig(0);
 
-        const log = TestBed.get(LogService);
+    const log = TestBed.get(LogService);
 
-        t.e(log)
-          .toBeDefined();
-        t.e(log.debug)
-          .toBeDefined();
-        t.e(log.error)
-          .toBeDefined();
-        t.e(log.warn)
-          .toBeDefined();
-        t.e(log.info)
-          .toBeDefined();
-      });
+    t.e(log).toBeDefined();
+    t.e(log.debug).toBeDefined();
+    t.e(log.error).toBeDefined();
+    t.e(log.warn).toBeDefined();
+    t.e(log.info).toBeDefined();
+  });
 
-      t.it('should not log anything by default', () => {
-        testModuleConfig(0);
+  t.it('should not log anything by default', () => {
+    testModuleConfig(0);
 
-        const config = TestBed.get(ConfigService);
-        const log = TestBed.get(LogService);
+    const config = TestBed.get(ConfigService);
+    const log = TestBed.get(LogService);
 
-        config.init()
-          .then(() => {
-            log.debug('debug');
-            t.e(console.log).not
-              .toHaveBeenCalledWith('debug');
-            log.error('error');
-            t.e(console.error).not
-              .toHaveBeenCalledWith('error');
-            log.warn('warn');
-            t.e(console.warn).not
-              .toHaveBeenCalledWith('warn');
-            log.info('info');
-            t.e(console.info).not
-              .toHaveBeenCalledWith('info');
-          });
-      });
+    config.init().then(() => {
+      log.debug('debug');
 
-      t.it('should log everything w/debug log level', () => {
-        testModuleConfig(LogLevel.Debug);
+      t.e(console.log).not.toHaveBeenCalledWith('debug');
 
-        const config = TestBed.get(ConfigService);
-        const log = TestBed.get(LogService);
+      log.error('error');
 
-        config.init()
-          .then(() => {
-            // should allow this level
-            log.debug('debug');
-            t.e(console.log)
-              .toHaveBeenCalledWith('debug');
+      t.e(console.error).not.toHaveBeenCalledWith('error');
 
-            // always overrides lower levels and allows them
-            log.error('error w/debug log level');
-            t.e(console.error)
-              .toHaveBeenCalledWith('error w/debug log level');
-            log.warn('warn w/debug log level');
-            t.e(console.warn)
-              .toHaveBeenCalledWith('warn w/debug log level');
-            log.info('info w/debug log level');
-            t.e(console.info)
-              .toHaveBeenCalledWith('info w/debug log level');
-          });
-      });
+      log.warn('warn');
 
-      t.it('should log `error`, `warn`, `info` w/error log level', () => {
-        testModuleConfig(LogLevel.Error);
+      t.e(console.warn).not.toHaveBeenCalledWith('warn');
 
-        const config = TestBed.get(ConfigService);
-        const log = TestBed.get(LogService);
+      log.info('info');
 
-        config.init()
-          .then(() => {
-            // never allows upper levels
-            log.debug('debug');
-            t.e(console.log).not
-              .toHaveBeenCalledWith('debug');
+      t.e(console.info).not.toHaveBeenCalledWith('info');
+    });
+  });
 
-            // should allow this level
-            log.error('error');
-            t.e(console.error)
-              .toHaveBeenCalledWith('error');
+  t.it('should log everything w/debug log level', () => {
+    testModuleConfig(LogLevel.Debug);
 
-            // always overrides lower levels and allows them
-            log.warn('warn w/error log level');
-            t.e(console.warn)
-              .toHaveBeenCalledWith('warn w/error log level');
-            log.info('info w/error log level');
-            t.e(console.info)
-              .toHaveBeenCalledWith('info w/error log level');
-          });
-      });
+    const config = TestBed.get(ConfigService);
+    const log = TestBed.get(LogService);
 
-      t.it('should log `warn`, `info` w/warn log level', () => {
-        testModuleConfig(LogLevel.Warn);
+    config.init().then(() => {
+      // should allow this level
+      log.debug('debug');
 
-        const config = TestBed.get(ConfigService);
-        const log = TestBed.get(LogService);
+      t.e(console.log).toHaveBeenCalledWith('debug');
 
-        config.init()
-          .then(() => {
-            // never allows upper levels
-            log.debug('debug');
-            t.e(console.log).not
-              .toHaveBeenCalledWith('debug');
-            log.error('error');
-            t.e(console.error).not
-              .toHaveBeenCalledWith('error');
+      // always overrides lower levels and allows them
+      log.error('error w/debug log level');
 
-            // should allow this level
-            log.warn('warn');
-            t.e(console.warn)
-              .toHaveBeenCalledWith('warn');
+      t.e(console.error).toHaveBeenCalledWith('error w/debug log level');
 
-            // always overrides lower levels and allows them
-            log.info('info w/warning log level');
-            t.e(console.info)
-              .toHaveBeenCalledWith('info w/warning log level');
-          });
-      });
+      log.warn('warn w/debug log level');
 
-      t.it('should log `info` w/info log level', () => {
-        testModuleConfig(LogLevel.Info);
+      t.e(console.warn).toHaveBeenCalledWith('warn w/debug log level');
 
-        const config = TestBed.get(ConfigService);
-        const log = TestBed.get(LogService);
+      log.info('info w/debug log level');
 
-        config.init()
-          .then(() => {
-            // never allows upper levels
-            log.debug('debug');
-            t.e(console.log).not
-              .toHaveBeenCalledWith('debug');
-            log.error('error');
-            t.e(console.error).not
-              .toHaveBeenCalledWith('error');
-            log.warn('warn');
-            t.e(console.warn).not
-              .toHaveBeenCalledWith('warn');
+      t.e(console.info).toHaveBeenCalledWith('info w/debug log level');
+    });
+  });
 
-            // should allow this level
-            log.info('info');
-            t.e(console.info)
-              .toHaveBeenCalledWith('info');
-          });
-      });
+  t.it('should log `error`, `warn`, `info` w/error log level', () => {
+    testModuleConfig(LogLevel.Error);
+
+    const config = TestBed.get(ConfigService);
+    const log = TestBed.get(LogService);
+
+    config.init().then(() => {
+      // never allows upper levels
+      log.debug('debug');
+
+      t.e(console.log).not.toHaveBeenCalledWith('debug');
+
+      // should allow this level
+      log.error('error');
+
+      t.e(console.error).toHaveBeenCalledWith('error');
+
+      // always overrides lower levels and allows them
+      log.warn('warn w/error log level');
+
+      t.e(console.warn).toHaveBeenCalledWith('warn w/error log level');
+
+      log.info('info w/error log level');
+
+      t.e(console.info).toHaveBeenCalledWith('info w/error log level');
+    });
+  });
+
+  t.it('should log `warn`, `info` w/warn log level', () => {
+    testModuleConfig(LogLevel.Warn);
+
+    const config = TestBed.get(ConfigService);
+    const log = TestBed.get(LogService);
+
+    config.init().then(() => {
+      // never allows upper levels
+      log.debug('debug');
+
+      t.e(console.log).not.toHaveBeenCalledWith('debug');
+
+      log.error('error');
+
+      t.e(console.error).not.toHaveBeenCalledWith('error');
+
+      // should allow this level
+      log.warn('warn');
+
+      t.e(console.warn).toHaveBeenCalledWith('warn');
+
+      // always overrides lower levels and allows them
+      log.info('info w/warning log level');
+
+      t.e(console.info).toHaveBeenCalledWith('info w/warning log level');
+    });
+  });
+
+  t.it('should log `info` w/info log level', () => {
+    testModuleConfig(LogLevel.Info);
+
+    const config = TestBed.get(ConfigService);
+    const log = TestBed.get(LogService);
+
+    config.init().then(() => {
+      // never allows upper levels
+      log.debug('debug');
+
+      t.e(console.log).not.toHaveBeenCalledWith('debug');
+
+      log.error('error');
+
+      t.e(console.error).not.toHaveBeenCalledWith('error');
+
+      log.warn('warn');
+
+      t.e(console.warn).not.toHaveBeenCalledWith('warn');
+
+      // should allow this level
+      log.info('info');
+
+      t.e(console.info).toHaveBeenCalledWith('info');
     });
   });
 });

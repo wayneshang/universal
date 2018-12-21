@@ -1,18 +1,15 @@
+import { head } from 'lodash/fp';
+import { initialAirline } from '~/app/store';
+
 export const MOCK_AIRLINES = [
   {
-    _id: '100000000000000000000001',
-    iataCode: 'X1',
-    name: 'Item #1'
+    ...initialAirline,
+    _id: '100000000000000000000001'
   },
   {
-    _id: '100000000000000000000002',
-    iataCode: 'X2',
-    name: 'Item #2'
+    ...initialAirline,
+    _id: '100000000000000000000002'
   }
 ];
 
-export const MOCK_AIRLINE = {
-  _id: '100000000000000000000001',
-  iataCode: 'X1',
-  name: 'Item #1'
-};
+export const MOCK_AIRLINE = head(MOCK_AIRLINES);

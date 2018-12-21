@@ -1,33 +1,21 @@
-// angular
-import { Component, OnInit } from '@angular/core';
-
-// libs
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { ConfigService } from '@ngx-config/core';
-// TODO: ngx-i18n-router
-// import { I18NRouterService } from '@ngx-i18n-router/core';
-
-// framework
 import { BaseComponent } from '~/app/framework/core';
-
-// store
 import { languageActions, State } from '~/app/store';
 
 @Component({
   selector: 'app-root',
-  templateUrl: './app.component.html'
+  templateUrl: './app.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent extends BaseComponent implements OnInit {
-  constructor(private readonly store$: Store<State>,
-              private readonly config: ConfigService
-              // TODO: ngx-i18n-router
-              // private readonly i18nRouter: I18NRouterService
-  ) {
+  constructor(private readonly store$: Store<State>, private readonly config: ConfigService) {
     super();
   }
 
   ngOnInit(): void {
     const settings = this.config.getSettings('i18n');
-    this.store$.dispatch(languageActions.init(settings));
+    this.store$.dispatch(languageActions.i18nInitLanguage(settings));
   }
 }
